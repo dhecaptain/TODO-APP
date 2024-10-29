@@ -1,0 +1,370 @@
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            padding-top: 20px;
+        }
+
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.5), 0 6px 20px 0 rgba(0,0,0,0.39);
+            background: lightpink;
+            margin-bottom: 5%;
+            border-radius: 25px;
+            padding: 2%;
+            overflow: auto;
+            resize: both;
+            text-overflow: ellipsis;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: lightblue;
+            transform: translateY(-5px);
+        }
+
+        .submit_form {
+            text-align: center;
+            padding: 3%;
+            background: pink;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4), 0 6px 20px 0 rgba(0,0,0,0.36);
+        }
+
+        .priority-high {
+            border-left: 5px solid #dc3545;
+        }
+
+        .priority-medium {
+            border-left: 5px solid #ffc107;
+        }
+
+        .priority-low {
+            border-left: 5px solid #28a745;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .form-inline {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .due-date {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+
+        .overdue {
+            color: #dc3545;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 2em;
+            color: #007bff;
+        }
+
+        .stat-card p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .sort-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .sort-controls .btn {
+            margin: 0 5px;
+            border-radius: 20px;
+        }
+
+        .sort-controls .active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .completed-task {
+            opacity: 0.7;
+        }
+
+        .completed-task .card-body {
+            text-decoration: line-through;
+        }
+
+        .export-btn {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-inline {
+                flex-direction: column;
+            }
+            .form-group {
+                width: 100%;
+            }
+            .dashboard {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body class="container-fluid">
+    {% if messages %}
+        {% for message in messages %}
+            <div class='alert alert-info alert-dismissible fade in'>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>{{ message }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <center>
+                <h1><i>__TODO LIST__</i></h1>
+                <hr>
+            </center>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <form method="get" class="form-inline">
+                <div class="row w-100">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <input type="text" name="search" class="form-control w-100" 
+                                placeholder="Search tasks..." value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <select name="status" class="form-control w-100">
+                                <option value="">All Status</option>
+                                {% for status in Todo.STATUS_CHOICES %}
+                                    <option value="{{ status.0 }}" 
+                                            {% if status.0 == status_filter %}selected{% endif %}>
+                                        {{ status.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <select name="priority" class="form-control w-100">
+                                <option value="">All Priorities</option>
+                                {% for priority in Todo.PRIORITY_CHOICES %}
+                                    <option value="{{ priority.0 }}"
+                                            {% if priority.0 == priority_filter %}selected{% endif %}>
+                                        {{ priority.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'todo' %}" class="btn btn-default">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="dashboard">
+                <div class="stat-card">
+                    <h3>{{ total_tasks }}</h3>
+                    <p>Total Tasks</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ completed_tasks }}</h3>
+                    <p>Completed</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ pending_tasks }}</h3>
+                    <p>Pending</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ high_priority }}</h3>
+                    <p>High Priority</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ overdue }}</h3>
+                    <p>Overdue</p>
+                </div>
+            </div>
+
+            <div class="sort-controls">
+                <span>Sort by:</span>
+                <a href="?sort=date" class="btn btn-sm btn-default {% if sort_by == 'date' %}active{% endif %}">Date ↑</a>
+                <a href="?sort=-date" class="btn btn-sm btn-default {% if sort_by == '-date' %}active{% endif %}">Date ↓</a>
+                <a href="?sort=priority" class="btn btn-sm btn-default {% if sort_by == 'priority' %}active{% endif %}">Priority</a>
+                <a href="?sort=status" class="btn btn-sm btn-default {% if sort_by == 'status' %}active{% endif %}">Status</a>
+                <a href="?sort=due_date" class="btn btn-sm btn-default {% if sort_by == 'due_date' %}active{% endif %}">Due Date</a>
+            </div>
+
+            <div class="export-btn">
+                <a href="{% url 'export_tasks' %}" class="btn btn-success">
+                    <span class="glyphicon glyphicon-download-alt"></span> Export Tasks
+                </a>
+            </div>
+
+            {% if not list %}
+                <div class="alert alert-info text-center">
+                    <h4>No tasks found</h4>
+                    <p>Add your first task using the form on the right!</p>
+                </div>
+            {% endif %}
+
+            {% for i in list %}
+                <div class="card priority-{{ i.priority|lower }} {% if i.status == 'COMPLETED' %}completed-task{% endif %}">
+                    <div class="card-body">
+                        <center><b>{{ i.title }}</b></center>
+                        <hr>
+                        <div class="task-meta">
+                            <span class="badge badge-info">{{ i.get_priority_display }}</span>
+                            <span class="badge badge-secondary">{{ i.get_status_display }}</span>
+                            {% if i.category %}
+                                <span class="badge" style="background-color: {{ i.category.color }}">
+                                    {{ i.category.name }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <hr>
+                        <small>Created: {{ i.date|date:"F j, Y, g:i a" }}</small>
+                        {% if i.due_date %}
+                            <div class="due-date {% if i.due_date < now %}overdue{% endif %}">
+                                Due: {{ i.due_date|date:"F j, Y, g:i a" }}
+                            </div>
+                        {% endif %}
+                        <hr>
+                        <div class="task-details">
+                            {{ i.details|safe }}
+                        </div>
+                        {% if i.tags %}
+                            <div class="tags">
+                                {% for tag in i.tags.split %}
+                                    <span class="badge">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="card-actions">
+                            <form action="{% url 'done' i.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-{% if i.status == 'COMPLETED' %}success{% else %}default{% endif %}">
+                                    <span class="glyphicon glyphicon-{% if i.status == 'COMPLETED' %}check{% else %}unchecked{% endif %}"></span>
+                                    {{ i.get_status_display }}
+                                </button>
+                            </form>
+                            <form action="{% url 'del' i.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this task?')">
+                                    <span class="glyphicon glyphicon-trash"></span> Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-3">
+            <div class="submit_form">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ forms|crispy }}
+                    <center>
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <span class="glyphicon glyphicon-plus"></span> Add Task
+                        </button>
+                    </center>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
